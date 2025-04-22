@@ -1,0 +1,217 @@
+---
+title: "Rmarkdown编写与GitHub协作"
+author: "hu"
+date: "2025-04-22"
+output: html_document
+---
+
+# （一）R markdown编写
+
+```{r install-chunk, echo=TRUE, eval=FALSE}
+# 下载 Rmarkdown 包
+install.packages("rmarkdown")
+```
+
+## 1. R Markdown 基础结构
+
+1.1 YAML 头部
+控制文档元数据和全局设置（必须用`---`包裹）：
+```yaml
+---
+title: "标题"
+author: "作者"
+date: 自动日期使用`r Sys.Date()`
+output: 
+  html_document: 
+    theme: cerulean
+    toc: true
+---
+```
+
+1.2 内容编写
+混合使用：
+
+```markdown
+# 一级标题
+## 二级标题
+### 三级标题
+
+- **加粗文本**
+- *斜体文本*
+- [链接](https://rmarkdown.rstudio.com)
+```
+
+## 2. 代码块系统
+
+2.1 基础代码块
+
+```{r basic-chunk, echo=TRUE, eval=TRUE}
+# 计算均值
+mean_val <- mean(iris$Sepal.Length)
+cat("鸢尾花萼片平均长度:", mean_val)
+```
+
+2.2 代码块参数
+常用参数控制：
+
+| 参数      | 功能                 | 示例值     |
+|-----------|----------------------|------------|
+| `echo`    | 显示代码             | TRUE/FALSE |
+| `eval`    | 执行代码             | TRUE/FALSE |
+| `fig.dim` | 图表尺寸             | c(6,4)     |
+| `cache`   | 缓存结果             | TRUE       |
+
+```{r advanced-chunk, fig.width=6, fig.height=4}
+library(ggplot2)
+ggplot(iris, aes(Sepal.Length, Sepal.Width)) + 
+  geom_point(aes(color=Species))
+```
+
+## 3. 动态内容
+
+3.1 内联R代码
+当前日期：`r Sys.Date()`  
+随机数生成：`r round(rnorm(1, mean=10), 2)`
+
+3.2 条件输出
+```{r conditional}
+if (nrow(mtcars) > 30) {
+  print("大数据集")
+} else {
+  print("小数据集")
+}
+```
+
+## 4. 多格式输出
+
+4.1 输出格式控制
+YAML中定义多格式：
+```yaml
+output:
+  html_document: default
+  pdf_document:
+    latex_engine: xelatex
+  word_document: null
+```
+
+4.2 渲染命令
+在R控制台执行：
+```{r render-example, eval=FALSE}
+# 渲染为HTML
+rmarkdown::render("input.Rmd", "html_document")
+
+# 渲染为PDF（需要LaTeX）
+rmarkdown::render("input.Rmd", "pdf_document")
+```
+
+## 5. 实用技巧
+
+5.1 表格生成
+```{r nice-table, results='asis'}
+knitr::kable(
+  head(mtcars[, 1:3]), 
+  caption = "格式化表格示例"
+)
+```
+
+5.2 交互元素
+```{r interactive, eval=FALSE}
+# 需要安装plotly
+library(plotly)
+plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length)
+```
+
+## 6. 文档维护
+
+6.1 依赖管理
+建议在开头添加：
+```{r setup, include=FALSE}
+# 自动安装缺失包
+if (!require("ggplot2")) install.packages("ggplot2")
+```
+
+6.2 版本控制
+推荐文件结构：
+```
+project/
+├── analysis.Rmd     # 主文档
+├── data/           # 原始数据
+├── figs/           # 生成图表
+└── output/         # 渲染结果
+```
+
+## 附录：学习资源
+- [R Markdown官方指南](https://rmarkdown.rstudio.com)
+- `help("rmarkdown")`查看本地帮助
+
+
+
+# （二）GitHub协作
+
+
+## 1. 创建仓库
+1.1 登录GitHub账号 [GitHub]("https://github.com/")  
+1.2 点击右上角+号选择"New repository"  
+1.3 填写仓库名称（如`edav_project`）  
+1.4 添加描述（可选）  
+1.5 初始化选项：  
+- ☑️ 添加README文件  
+- ☑️ 添加.gitignore模板（选择R模板）  
+- ☑️ 添加许可证（可选）  
+1.6 对于哥伦比亚学生：使用学校邮箱设置私有仓库  
+
+## 2. 分支管理
+可以通过输入新名称创建"branch"，以便在不影响主分支的基础上安全地对工作进行更改。
+
+## 3. 添加协作者
+3.1 进入仓库 Settings > Collaborators > Manage Access  
+3.2 点击"Add people"  
+3.3 输入协作者的GitHub用户名/邮箱  
+3.4 协作者会收到邮件邀请  
+
+## 4. 变更追踪
+查看提交历史：点击“Commit"  
+- 红色：删除；绿色：添加
+
+## 5. Blame功能
+在GitHub文件界面：  
+- 点击右上角"Blame"按钮  
+- 显示每行代码的作者信息
+
+## 6. Issues管理
+点击顶部"<>Code"旁边的"Issues"。
+"Issues"可用于跟踪待办事项、错误和其他注释，以留在存储库中供其他人查看。你可以通过@提醒合作者，或者如果你在解决问题上遇到了困难，可以以此让其他人看到并帮助你解决问题。
+
+## 7.R studio上传
+
+7.1在GitHub网站上找到你想克隆的仓库
+-点击"Code"按钮
+-选择"HTTPS"选项
+-点击复制图标复制仓库URL
+
+7.2在RStudio中创建新项目：
+-打开RStudio
+-点击菜单栏的"File" > "New Project..."
+-选择"Version Control"
+-选择"Git"
+-在弹出的对话框中：
+-粘贴你复制的仓库URL
+-点击"Create Project"
+
+7.3：推送.Rproj文件到GitHub
+-首先拉取更新：点击RStudio右上角"Git"面板中的"Pull"按钮，确保本地与远程同步
+-暂存文件：在"Git"面板勾选你想提交的文件（包括.Rproj文件）
+-提交更改：点击"Commit"按钮
+-在提交信息框中：首次提交可写"initial commit"
+-后续提交应描述你所做的更改
+-点击"Commit"
+-推送更改：点击"Push"按钮将更改推送到GitHub
+-验证：刷新GitHub页面查看.Rproj文件是否已添加
+
+
+# 附录：学习资源
+- [GitHub协作指南](https://jtr13.github.io/cc21/collaborating-on-rstudio-with-github.html)
+
+```{r session-info, echo=FALSE}
+sessionInfo()  # 记录会话信息
+```
